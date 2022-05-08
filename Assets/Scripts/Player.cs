@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
     public bool IsFreezed
     {
         get => isFreezed;
+        set => isFreezed = value;
     }
 
     private bool isFreezed;

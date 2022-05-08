@@ -11,6 +11,7 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
+        ShowMainMenu();
         InitPlayer();
     }
 
@@ -40,7 +41,8 @@ public class GameController : MonoBehaviour
 
         _player.transform.position = playerPos;
         _player.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
-        
+        _player.IsFreezed = true;
+
         _gameScreenView.SetScore(_player.CubesStack.SurfCubes.Count);
     }
 
@@ -49,6 +51,11 @@ public class GameController : MonoBehaviour
         if (_player.IsFreezed) return;
 
         UpdateCameraTargets();
+    }
+
+    private void ShowMainMenu()
+    {
+        
     }
 
     private void UpdateCameraTargets()

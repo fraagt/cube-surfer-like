@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private Roads _roads;
     [SerializeField] private CameraFollower _playerCamera;
     [SerializeField] private GameScreenView _gameScreenView;
+    [SerializeField] private MainMenuView _mainMenuView;
 
     private void Start()
     {
@@ -18,11 +19,32 @@ public class GameController : MonoBehaviour
     private void OnEnable()
     {
         _player.CubesStack.onSurfCubeCountChanged += OnSurfCubeCountChanged;
+        _mainMenuView.StartGameButton.onClick.AddListener(OnStartGameClicked);
+        _mainMenuView.ExitButton.onClick.AddListener(OnExitButtonClicked);
     }
 
     private void OnDisable()
     {
         _player.CubesStack.onSurfCubeCountChanged -= OnSurfCubeCountChanged;
+        _mainMenuView.StartGameButton.onClick.RemoveListener(OnStartGameClicked);
+        _mainMenuView.ExitButton.onClick.RemoveListener(OnExitButtonClicked);
+    }
+
+    private void OnStartGameClicked()
+    {
+        _mainMenuView.gameObject.SetActive(false);
+        _gameScreenView.gameObject.SetActive(true);
+
+        _player.IsFreezed = false;
+    }
+
+    private void OnExitButtonClicked()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.ExitPlaymode();
+        return;
+#endif
+        Application.Quit();
     }
 
     private void OnSurfCubeCountChanged(int cubesCount)
@@ -54,7 +76,8 @@ public class GameController : MonoBehaviour
 
     private void ShowMainMenu()
     {
-        
+        _gameScreenView.gameObject.SetActive(false);
+        _mainMenuView.gameObject.SetActive(true);
     }
 
     private void UpdateCameraTargets()

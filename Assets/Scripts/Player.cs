@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public SurfCubesStack CubesStack
     {
         get => cubesStack;
+        
     }
 
     [SerializeField] private SurfCubesStack cubesStack;

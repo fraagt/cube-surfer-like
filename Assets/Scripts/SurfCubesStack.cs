@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -11,13 +12,15 @@ public class SurfCubesStack : MonoBehaviour
         Left
     }
 
-    [SerializeField]
-    private GameObject surfCubePrefab;
+    public Action<int> onSurfCubeCountChanged;
+
+    [SerializeField] private GameObject surfCubePrefab;
 
     public List<SurfCube> SurfCubes
     {
         get => surfCubes;
     }
+
     private List<SurfCube> surfCubes;
 
     public SurfCubeStackState State
@@ -25,8 +28,8 @@ public class SurfCubesStack : MonoBehaviour
         get => state;
         set => state = value;
     }
-    [SerializeField]
-    private SurfCubeStackState state;
+
+    [SerializeField] private SurfCubeStackState state;
 
     private void Awake()
     {
@@ -50,6 +53,7 @@ public class SurfCubesStack : MonoBehaviour
     {
         surfCube.transform.SetParent(transform);
         surfCubes.Add(surfCube);
+        onSurfCubeCountChanged.Invoke(surfCubes.Count);
         surfCube.name = SurfCube.Name + surfCubes.Count;
 
         ReCalcCollider();
@@ -70,6 +74,7 @@ public class SurfCubesStack : MonoBehaviour
         var cube = surfCubes[surfCubes.Count - 1];
 
         surfCubes.RemoveAt(surfCubes.Count - 1);
+        onSurfCubeCountChanged.Invoke(surfCubes.Count);
 
         cube.transform.SetParent(null);
 

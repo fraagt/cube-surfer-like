@@ -1,54 +1,59 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    [SerializeField]
-    private Player player;
-
-    [SerializeField]
-    private Roads roads;
-
-    [SerializeField]
-    private CameraFollower playerCamera;
+    [SerializeField] private Player _player;
+    [SerializeField] private Roads _roads;
+    [SerializeField] private CameraFollower _playerCamera;
+    [SerializeField] private GameScreenView _gameScreenView;
 
     private void Start()
     {
         InitPlayer();
+    }
 
-        var cubes = new List<SurfCube>();
-        for (int i = 0; i < 5; i++)
-        {
-            var cube = Instantiate(player.CubesStack.SurfCubes[0]);
-            cubes.Add(cube);
-        }
-        
-        player.PushSurfCubes(cubes);
+    private void OnEnable()
+    {
+        _player.CubesStack.onSurfCubeCountChanged += OnSurfCubeCountChanged;
+    }
+
+    private void OnDisable()
+    {
+        _player.CubesStack.onSurfCubeCountChanged -= OnSurfCubeCountChanged;
+    }
+
+    private void OnSurfCubeCountChanged(int cubesCount)
+    {
+        _gameScreenView.SetScore(cubesCount);
     }
 
     private void InitPlayer()
     {
-        var roadBounds = roads.CurrentRoad.RoadBounds;
+        var roadBounds = _roads.CurrentRoad.RoadBounds;
 
         Vector3 playerPos = roadBounds.center;
         playerPos.y = 1;
         playerPos.x -= roadBounds.extents.x;
         playerPos.z -= roadBounds.extents.z;
 
-        player.transform.position = playerPos;
-        player.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+        _player.transform.position = playerPos;
+        _player.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+        
+        _gameScreenView.SetScore(_player.CubesStack.SurfCubes.Count);
     }
 
     private void FixedUpdate()
     {
-        if (player.IsFreezed) return;
+        if (_player.IsFreezed) return;
 
         UpdateCameraTargets();
     }
 
     private void UpdateCameraTargets()
     {
-        playerCamera.targets = GetSurfCubeTransforms();
+        _playerCamera.targets = GetSurfCubeTransforms();
     }
 
     private List<Transform> GetSurfCubeTransforms()
@@ -56,7 +61,7 @@ public class GameController : MonoBehaviour
         List<Transform> surfCubeTransforms =
             new List<Transform>();
 
-        foreach(SurfCube surfCube in player.CubesStack.SurfCubes)
+        foreach (SurfCube surfCube in _player.CubesStack.SurfCubes)
         {
             surfCubeTransforms.Add(surfCube.transform);
         }
@@ -66,7 +71,7 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
-        if (player.IsFreezed) return;
+        if (_player.IsFreezed) return;
 
         OutOfBounds();
     }
@@ -74,20 +79,20 @@ public class GameController : MonoBehaviour
     private void OutOfBounds()
     {
         Bounds roadBounds =
-            roads.CurrentRoad.RoadBounds;
+            _roads.CurrentRoad.RoadBounds;
         Vector3 playerPos =
-            player.transform.position - roadBounds.center;
+            _player.transform.position - roadBounds.center;
         Vector3 roadCornerPoint =
-            roadBounds.extents - (player.Size / 2);
+            roadBounds.extents - (_player.Size / 2);
 
         float difference =
             playerPos.magnitude - roadCornerPoint.magnitude;
         if (difference > 0)
         {
             Vector3 playerBounds =
-                player.transform.position;
+                _player.transform.position;
 
-            player.transform.position = playerBounds;
+            _player.transform.position = playerBounds;
         }
     }
 }

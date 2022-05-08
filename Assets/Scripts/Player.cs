@@ -9,29 +9,20 @@ public class Player : MonoBehaviour
     {
         get => cubesStack;
     }
-    [SerializeField]
-    private SurfCubesStack cubesStack;
 
-    [SerializeField]
-    private Transform character;
+    [SerializeField] private SurfCubesStack cubesStack;
 
-    [SerializeField]
-    private float speed;
+    [SerializeField] private Transform character;
 
-    [SerializeField]
-    private float sideSpeed;
+    [SerializeField] private float speed;
 
-    public Vector3 Direction
-    {
-        get => direction;
-        set => direction = value;
-    }
-    private Vector3 direction;
+    [SerializeField] private float sideSpeed;
 
     public bool IsFreezed
     {
         get => isFreezed;
     }
+
     private bool isFreezed;
 
     public Vector3 Size
@@ -75,8 +66,6 @@ public class Player : MonoBehaviour
 
         movement += ForwwardMovement();
 
-        movement += SideMovement();
-
         movement += SideKeyboard();
 
         transform.position = movement;
@@ -86,51 +75,16 @@ public class Player : MonoBehaviour
     {
         Vector3 sideMovement = Vector3.zero;
         if (Input.GetKeyDown(KeyCode.A))
-        {
-            Vector3 moveByAxis = direction.GetPerpendicular();
-
-            moveByAxis.x *= (moveByAxis.x < 0) ? -1 : 1;
-            moveByAxis.z *= (moveByAxis.z > 0) ? -1 : 1;
-
-            sideMovement.x += -moveByAxis.x * sideSpeed * 20;
-            sideMovement.z += -moveByAxis.z * sideSpeed * 20;
-        }
+            sideMovement = Vector3.left;
         if (Input.GetKeyDown(KeyCode.D))
-        {
-            Vector3 moveByAxis = direction.GetPerpendicular();
+            sideMovement = Vector3.right;
 
-            moveByAxis.x *= (moveByAxis.x < 0) ? -1 : 1;
-            moveByAxis.z *= (moveByAxis.z > 0) ? -1 : 1;
-
-            sideMovement.x += moveByAxis.x * sideSpeed * 20;
-            sideMovement.z += moveByAxis.z * sideSpeed * 20;
-        }
-
-        return sideMovement;
-    }
-
-    private Vector3 SideMovement()
-    {
-        Vector3 sideMovement = Vector3.zero;
-
-        if (Input.touchCount != 0)
-        {
-            Touch touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Moved)
-            {
-                Vector3 moveByAxis = direction.GetPerpendicular().Abs();
-
-                sideMovement.x += moveByAxis.x * touch.deltaPosition.x * sideSpeed;
-                sideMovement.z += moveByAxis.z * touch.deltaPosition.x * sideSpeed;
-            }
-        }
-
-        return sideMovement;
+        return sideMovement * sideSpeed;
     }
 
     private Vector3 ForwwardMovement()
     {
-        return direction * speed * Time.deltaTime;
+        return Vector3.forward * speed * Time.deltaTime;
     }
 
     public void PushSurfCube()
@@ -167,91 +121,6 @@ public class Player : MonoBehaviour
     {
         cubesStack.Pop();
     }
-
-    #region PlayerTurning
-    public void Turn(TurnDirection turn, Vector3 anchorVector)
-    {
-        isFreezed = true;
-
-        StartCoroutine(Turning2(turn.Angle(), anchorVector));
-
-        direction = direction.TurnVector(turn);
-    }
-
-    IEnumerator Turning(float angle, Vector3 anchor)
-    {
-        float radius = AlongDirectionDistance(anchor);
-        float quoterCircumference = 0.5f * Mathf.PI * radius;
-        float duration = quoterCircumference / speed;
-        float stepAngle = angle / (duration / Time.fixedDeltaTime);
-
-        float elapsed = 0.0f;
-        while (elapsed < duration)
-        {
-            transform.RotateAround(anchor, Vector3.up, stepAngle);
-
-            elapsed += Time.fixedDeltaTime;
-
-            yield return null;
-        }
-
-        isFreezed = false;
-    }
-
-    IEnumerator Turning2(float angle, Vector3 anchor)
-    {
-        float duration = Mathf.Abs(angle) / (speed * 10);
-        float stepAngle = (speed * 10) * Time.fixedDeltaTime;
-        stepAngle *= (angle < 0) ? -1 : 1;
-
-        float elapsed = 0.0f;
-        while (elapsed < duration)
-        {
-            transform.RotateAround(anchor, Vector3.up, stepAngle);
-
-            elapsed += Time.fixedDeltaTime;
-
-            yield return null;
-        }
-
-        isFreezed = false;
-    }
-
-    IEnumerator Turning3(float angle, Vector3 anchor)
-    {
-        float elapsed = 0.0f;
-        while (elapsed < 5f)
-        {
-            Vector3 relativePos = (anchor - transform.position);
-            Quaternion rotation = Quaternion.LookRotation(relativePos);
-
-            Quaternion current = transform.localRotation;
-
-            transform.localRotation = Quaternion.Slerp(current, rotation, Time.fixedDeltaTime);
-            transform.Translate(0, 0, 3 * Time.fixedDeltaTime);
-
-            elapsed += Time.fixedDeltaTime;
-
-            yield return null;
-        }
-
-        isFreezed = false;
-    }
-
-    private float AlongDirectionDistance(Vector3 point)
-    {
-        float distance = 0;
-
-        if (direction.x != 0)
-            distance = Mathf.Abs(transform.position.z - point.z);
-        if (direction.z != 0)
-            distance = Mathf.Abs(transform.position.x - point.x);
-
-        distance = (distance == 0) ? 1 : distance;
-
-        return distance;
-    }
-    #endregion PlayerTurning
 
     private void OnTriggerEnter(Collider other)
     {

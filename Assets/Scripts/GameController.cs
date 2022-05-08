@@ -36,7 +36,6 @@ public class GameController : MonoBehaviour
 
         Vector3 playerPos = roadBounds.center;
         playerPos.y = 1;
-        playerPos.x -= roadBounds.extents.x;
         playerPos.z -= roadBounds.extents.z;
 
         _player.transform.position = playerPos;
